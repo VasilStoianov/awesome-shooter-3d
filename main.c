@@ -83,12 +83,16 @@ int main() {
   Cube *cube = malloc(sizeof(Cube));
   identityCubeMatrices(cube);
   float angle = 45.f;
+  float angleMult = 1;
 
   setRotationY(angle, cube->rotate);
   setRotationX(angle,cube->rotate);
  // setTranslation((vector){1.f,1.f,1.f},cube->translate);
   //setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
   transform(cube->transform, cube->translate, cube->rotate, cube->scale);
+  mat4f projection = {0};
+  createProjection(90.f,&projection);
+
 
   glEnable(GL_DEPTH_TEST);
   //glCullFace(GL_BACK);
@@ -100,21 +104,21 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float scaleSpeed = 0.5f; // Adjust speed of scaling
-    angle += 1;
-    if(angle>90) {
-     angle = -90;
+    angle += angleMult;
+    if(angle>90 || angle < -90) {
+     angleMult *= -1;
     }
 setRotationX(toRad(angle),cube->rotateX);
       setRotationY(toRad(angle), cube->rotateY);
-      multiplyMat4f2(cube->rotate,cube->rotateY,cube->rotateX);
+    // setRotationZ(angle,cube->rotate);
+  multiplyMat4f2(cube->rotate,cube->rotateY,cube->rotateX);
   //setTranslation((vector){1.f,1.f,1.f},cube->translate);
   //setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
 
+
   transform(cube->transform, cube->translate, cube->rotate, cube->scale);
-  printf("-------------------------\n");
-  printMatix(cube->transform);
-  printf("-------------------------\n");
   setUniformMatrix4f("transform",vertex.id,cube->transform);
+  setUniformMatrix4f("projection",vertex.id,projection);
 
 
      glBindTexture(GL_TEXTURE_2D, image.id);
