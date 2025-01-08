@@ -87,11 +87,11 @@ int main() {
 
   setRotationY(angle, cube->rotate);
   setRotationX(angle,cube->rotate);
- // setTranslation((vector){1.f,1.f,1.f},cube->translate);
+  setTranslation((vector){0.f,0.f,1.f},cube->translate);
   //setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
-  transform(cube->transform, cube->translate, cube->rotate, cube->scale);
   mat4f projection = {0};
-  createProjection(90.f,&projection);
+  createProjection(90.f,&projection,SCR_HEIGHT,SCR_WIDTH,0.1f,100.f);
+
 
 
   glEnable(GL_DEPTH_TEST);
@@ -109,10 +109,12 @@ int main() {
      angleMult *= -1;
     }
 setRotationX(toRad(angle),cube->rotateX);
-      setRotationY(toRad(angle), cube->rotateY);
     // setRotationZ(angle,cube->rotate);
+  
+  setTranslation((vector){0.f,0.f,-1.5f},cube->translate);
   multiplyMat4f2(cube->rotate,cube->rotateY,cube->rotateX);
-  //setTranslation((vector){1.f,1.f,1.f},cube->translate);
+  
+  printMatix(projection);
   //setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
 
 

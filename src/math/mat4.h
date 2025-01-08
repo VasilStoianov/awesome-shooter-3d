@@ -3,9 +3,8 @@
 #include "vector.h"
 #include "math.h"
 
-
 # define M_PI		3.14159265358979323846	/* pi */
-#define toRad(x) (x*M_PI/180.f)
+#define toRad(x) ((x)*M_PI/180.f)
 typedef float mat4f[4][4];
 
 
@@ -106,17 +105,15 @@ void setScale(vector scale, mat4f *matrix){
 
 
 
-void createProjection(float fov,mat4f* m){
-  float tang = tanf(toRad(fov/2.f));
+void createProjection(float fov,mat4f* m,float heigth,float width,float near,float far){
+  float tang = tanf(toRad(fov)/2.f);
+  float aspect = width/heigth;
 
-  float f = 1/tang;
-
-  identity(m);
-
- (*m)[0][0] =f;
-  (*m)[1][1] = f;
-  (*m)[3][3]=0.0;
-  (*m)[3][2] = 1.f;    
+ (*m)[0][0] =1.0f/(aspect*tang);
+  (*m)[1][1] =  1.0f/tang;;
+  (*m)[2][2] = (far + near)/(near - far);
+  (*m)[2][3] = (2.f * far * near)/(near - far);
+  (*m)[3][2] = -1.f;    
 
 }
 
