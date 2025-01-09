@@ -5,15 +5,11 @@ layout (location = 1) in vec2 aTexCoord;
 out vec2 TexCoord;
 uniform mat4 transform;
 uniform mat4 projection;
+uniform mat4 camera;
 
 void main()
 {
-
-	mat4 proj = mat4(
-		0.750000, 0.000000, 0.000000, 0.000000, 
-0.000000, 1.000000, 0.000000, 0.000000, 
-0.000000, 0.000000, -1.002002, -1.000000, 
-0.000000, 0.000000, -0.200200, 0.000000);
-	gl_Position =projection*transform*vec4(aPos, 1.0);
+     mat4 finalM = projection*camera*transform;
+	gl_Position =finalM*vec4(aPos, 1.0);
 	TexCoord = vec2(aTexCoord.x, aTexCoord.y);
 }
