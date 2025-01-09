@@ -9,6 +9,7 @@
 #include "math/vector.h"
 #include "stdio.h"
 #include "vertex.h"
+#include "camera.h"
 
 int key_pressed[GLFW_KEY_LAST] = {0};
 float zMove = 0.0;
@@ -81,18 +82,33 @@ int main() {
   loadImage("resources/container.jpg", &image);
 
   Cube *cube = malloc(sizeof(Cube));
+  Camera *camera = malloc(sizeof(Camera));
   identityCubeMatrices(cube);
-  float angle = 45.f;
+
+   float angle = 45.f;
+  float angleMult = 1;
+
+
 
   setRotationY(angle, cube->rotate);
   setRotationX(angle,cube->rotate);
- // setTranslation((vector){1.f,1.f,1.f},cube->translate);
+  setTranslation((vector){0.f,0.f,1.f},cube->translate);
   //setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
-  transform(cube->transform, cube->translate, cube->rotate, cube->scale);
+ 
+  mat4f projection = {0};
+  createProjection(90.f,&projection,SCR_HEIGHT,SCR_WIDTH,0.1f,100.f);
+ 
+  createCameraMatrix(camera);
+  vector camPos = {0.f,0.f,0.f};
+  setCameraPosition(camera,camPos);  
+  printMatix(camera->cameraMatrix);
 
   glEnable(GL_DEPTH_TEST);
   //glCullFace(GL_BACK);
   glfwSetKeyCallback(window, processInput);
+  
+
+ float camX = .00001f;  
   while (!glfwWindowShouldClose(window)) {
 
     float dt = 1.0 / 60.f;
@@ -100,21 +116,27 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float scaleSpeed = 0.5f; // Adjust speed of scaling
-    angle += 1;
-    if(angle>90) {
-     angle = -90;
+    angle += angleMult;
+    if(angle>90 || angle < -90) {
+     angleMult *= -1;
     }
-setRotationX(toRad(angle),cube->rotateX);
-      setRotationY(toRad(angle), cube->rotateY);
-      multiplyMat4f2(cube->rotate,cube->rotateY,cube->rotateX);
-  //setTranslation((vector){1.f,1.f,1.f},cube->translate);
-  //setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
+    if(camPos.x > 1.f || camPos.x < -1.f){
+      camX *= -1;
+     }
+    camPos.x +=angleMult * dt;
+    setRotationX(toRad(angle),cube->rotateX);
+  
+  setTranslation((vector){0.f,0.f,-1.5f},cube->translate);
+  multiplyMat4f2(cube->rotate,cube->rotateY,cube->rotateX);
+  
+  setCameraPosition(camera,camPos);
 
   transform(cube->transform, cube->translate, cube->rotate, cube->scale);
-  printf("-------------------------\n");
-  printMatix(cube->transform);
-  printf("-------------------------\n");
+  
+
   setUniformMatrix4f("transform",vertex.id,cube->transform);
+  setUniformMatrix4f("projection",vertex.id,projection);
+  setUniformMatrix4f("camera",vertex.id,camera->cameraMatrix);
 
 
      glBindTexture(GL_TEXTURE_2D, image.id);
@@ -129,6 +151,8 @@ setRotationX(toRad(angle),cube->rotateX);
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
   glDeleteBuffers(1, &EBO);
+  free(cube);
+  free(camera);
   glfwTerminate();
   return 0;
 }
