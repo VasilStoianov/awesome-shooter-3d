@@ -2,6 +2,7 @@
 #include "glad.h"
 
 #include "GLFW/glfw3.h"
+#include "camera.h"
 #include "cube.h"
 #include "image.h"
 #include "math.h"
@@ -9,7 +10,6 @@
 #include "math/vector.h"
 #include "stdio.h"
 #include "vertex.h"
-#include "camera.h"
 
 int key_pressed[GLFW_KEY_LAST] = {0};
 float zMove = 0.0;
@@ -83,32 +83,30 @@ int main() {
 
   Cube *cube = malloc(sizeof(Cube));
   Camera *camera = malloc(sizeof(Camera));
+  glfwSetWindowUserPointer(window, camera);
+
   identityCubeMatrices(cube);
 
-   float angle = 45.f;
+  float angle = 45.f;
   float angleMult = 1;
 
-
-
   setRotationY(angle, cube->rotate);
-  setRotationX(angle,cube->rotate);
-  setTranslation((vector){0.f,0.f,1.f},cube->translate);
-  //setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
- 
+  setRotationX(angle, cube->rotate);
+  setTranslation((vector){0.f, 0.f, 1.f}, cube->translate);
+  // setScale((vector){0.5f,0.5f,0.5f},&cube->scale);
+
   mat4f projection = {0};
-  createProjection(90.f,&projection,SCR_HEIGHT,SCR_WIDTH,0.1f,100.f);
- 
+  createProjection(90.f, &projection, SCR_HEIGHT, SCR_WIDTH, 0.1f, 100.f);
+
   createCameraMatrix(camera);
-  vector camPos = {0.f,0.f,0.f};
-  setCameraPosition(camera,camPos);  
-  printMatix(camera->cameraMatrix);
+  camera->cameraPosition = (vector){0.f, 0.f, 0.f};
+  setCameraPosition(camera);
 
   glEnable(GL_DEPTH_TEST);
-  //glCullFace(GL_BACK);
+  // glCullFace(GL_BACK);
   glfwSetKeyCallback(window, processInput);
-  
 
- float camX = .00001f;  
+  float camX = .01f;
   while (!glfwWindowShouldClose(window)) {
 
     float dt = 1.0 / 60.f;
@@ -117,35 +115,32 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float scaleSpeed = 0.5f; // Adjust speed of scaling
     angle += angleMult;
-    if(angle>90 || angle < -90) {
-     angleMult *= -1;
+    if (angle > 90 || angle < -90) {
+      angleMult *= -1;
     }
-    if(camPos.x > 1.f || camPos.x < -1.f){
-      camX *= -1;
-     }
-    camPos.x +=angleMult * dt;
-    setRotationX(toRad(angle),cube->rotateX);
-  
-  setTranslation((vector){0.f,0.f,-1.5f},cube->translate);
-  multiplyMat4f2(cube->rotate,cube->rotateY,cube->rotateX);
-  
-  setCameraPosition(camera,camPos);
 
-  transform(cube->transform, cube->translate, cube->rotate, cube->scale);
-  
+    setRotationX(toRad(angle), cube->rotateX);
 
-  setUniformMatrix4f("transform",vertex.id,cube->transform);
-  setUniformMatrix4f("projection",vertex.id,projection);
-  setUniformMatrix4f("camera",vertex.id,camera->cameraMatrix);
+    setTranslation((vector){0.f, 0.f, -1.5f}, cube->translate);
+    multiplyMat4f2(cube->rotate, cube->rotateY, cube->rotateX);
+    transform(cube->transform, cube->translate, cube->rotate, cube->scale);
+    printf("+++++++++++++\n");
+    printMatix(camera->finalCamera);
+
+    printf("+++++++++++++\n");
 
 
-     glBindTexture(GL_TEXTURE_2D, image.id);
+    setUniformMatrix4f("transform", vertex.id, cube->transform);
+    setUniformMatrix4f("projection", vertex.id, projection);
+    setUniformMatrix4f("camera", vertex.id, camera->finalCamera);
+
+   glBindTexture(GL_TEXTURE_2D, image.id);
     glUseProgram(vertex.id);
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    glfwSwapBuffers(window);
     glfwPollEvents();
+    glfwSwapBuffers(window);
   }
 
   glDeleteVertexArrays(1, &VAO);
@@ -162,25 +157,10 @@ int main() {
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window, int key, int scancode, int action,
                   int mods) {
-  if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
-    glfwSetWindowShouldClose(window, 1);
-  }
-  if (action == GLFW_PRESS && key == GLFW_KEY_KP_ADD && !key_pressed[key]) {
-    zMove += 0.5;
-    key_pressed[key] = 1;
-  }
-  if (action == GLFW_PRESS && key == GLFW_KEY_KP_SUBTRACT &&
-      !key_pressed[key]) {
-    zMove -= 0.5;
-  } else if (GLFW_RELEASE == action) {
-    key_pressed[key] = 0;
-  }
-  if (action == GLFW_REPEAT && key == GLFW_KEY_RIGHT) {
-    zMove += 0.1;
-  }
-  if (action == GLFW_REPEAT && key == GLFW_KEY_LEFT) {
-    zMove -= 0.1;
-  }
+
+  Camera *camera = (Camera *)glfwGetWindowUserPointer(window);
+
+  handleCameraMovement(window,key, camera);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback

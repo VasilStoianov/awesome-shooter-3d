@@ -57,21 +57,24 @@ void setTranslation(vector vec,mat4f matrix)
 
 
 void setForwards(vector forwards,mat4f *matrix){
-  (*matrix)[0][0] = forwards.x;
-  (*matrix)[0][1] = forwards.y;
-  (*matrix)[0][2] = forwards.z;
+  (*matrix)[2][0] = forwards.x;
+  (*matrix)[2][1] = forwards.y;
+  (*matrix)[2][2] = forwards.z;
+ (*matrix)[2][3] =0; 
 }
 
 void setUp(vector up,mat4f *matrix){
   (*matrix)[1][0] = up.x;
   (*matrix)[1][1] = up.y;
   (*matrix)[1][2] = up.z;
+  (*matrix)[1][3] = 0;
 }
 
 void setRight(vector right,mat4f *matrix){
-  (*matrix)[2][0] = right.x;
-  (*matrix)[2][1] = right.y;
-  (*matrix)[2][2] = right.z;
+  (*matrix)[0][0] = right.x;
+  (*matrix)[0][1] = right.y;
+  (*matrix)[0][2] = right.z;
+  (*matrix)[0][3] = 0;
 }
 
 void setPosition(vector pos,mat4f *matrix){

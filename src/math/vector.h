@@ -9,9 +9,15 @@ typedef struct vector
 } vector;
 
 void scale(vector *vec, float scalar){
-   vec->x *= scalar;
-   vec->y *= scalar;  
-   vec->z *= scalar;
+   vector res = {x: vec->x* scalar, y: vec->y * scalar, vec->z * scalar};
+   vec->x = res.x;
+   vec->y = res.y;  
+   vec->z = res.z;
+}
+
+vector scaleAndReturn(vector *vec, float scalar){
+ vector res = {x: vec->x* scalar, y: vec->y * scalar, vec->z * scalar};
+return res;
 }
 
 vector vectorAddition(vector a, vector b){
@@ -27,6 +33,13 @@ void addToVector(vector *toAdd, vector forAdd){
       toAdd->y += forAdd.y;
       toAdd->z += forAdd.z;
 }
+
+ void subtractVector(vector* toSub, vector forSub){
+     toSub->x -= forSub.x;
+     toSub->y -= forSub.y;
+      toSub->z -= forSub.z;
+}
+
 
 vector subtract(vector a, vector b){
     vector res = {0};
@@ -46,13 +59,11 @@ float dot(vector a, vector b){
    return a.x * b.x + a.y + b.y + a.z * b.z;    
 }
 
-vector normalize(vector a){
-    vector res = {0};
+void normalize(vector a){
     float length = vectorLength(a);
-    res.x = a.x/length;
-    res.y = a.y/length;
-    res.z = a.z/length;
-    return res;
+    a.x = a.x/length;
+    a.y = a.y/length;
+   a.z = a.z/length;
 }
 
 
