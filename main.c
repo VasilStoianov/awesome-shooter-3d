@@ -124,11 +124,6 @@ int main() {
     setTranslation((vector){0.f, 0.f, -1.5f}, cube->translate);
     multiplyMat4f2(cube->rotate, cube->rotateY, cube->rotateX);
     transform(cube->transform, cube->translate, cube->rotate, cube->scale);
-    printf("+++++++++++++\n");
-    printMatix(camera->finalCamera);
-
-    printf("+++++++++++++\n");
-
 
     setUniformMatrix4f("transform", vertex.id, cube->transform);
     setUniformMatrix4f("projection", vertex.id, projection);
@@ -158,8 +153,10 @@ int main() {
 void processInput(GLFWwindow *window, int key, int scancode, int action,
                   int mods) {
 
+  if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+  glfwSetWindowShouldClose(window,1);
+  }
   Camera *camera = (Camera *)glfwGetWindowUserPointer(window);
-
   handleCameraMovement(window,key, camera);
 }
 

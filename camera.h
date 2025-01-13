@@ -118,11 +118,7 @@ case GLFW_KEY_KP_SUBTRACT:{
     addToVector(&camera->cameraPosition,scaleAndReturn(&backwards,cameraScaler));
     break;
   }
-  case GLFW_KEY_ESCAPE: {
-  glfwSetWindowShouldClose(window,1);
-  break;
   
-  }
   default:
     break;
   
