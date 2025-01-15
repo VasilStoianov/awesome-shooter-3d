@@ -115,11 +115,12 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float scaleSpeed = 0.5f; // Adjust speed of scaling
     angle += angleMult;
-    if (angle > 90 || angle < -90) {
-      angleMult *= -1;
+    if (angle >  360|| angle < -360) {
+angle = 0;
     }
 
-    setRotationX(toRad(angle), cube->rotateX);
+
+    setRotationY(toRad(angle), cube->rotateX);
 
     setTranslation((vector){0.f, 0.f, -1.5f}, cube->translate);
     multiplyMat4f2(cube->rotate, cube->rotateY, cube->rotateX);
