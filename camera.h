@@ -63,6 +63,16 @@ camera->rigthRotation = (vector){0.f};
 
 void cameraTransform(Camera* camera){
     
+
+    vector eul = eulerToVector(camera->euler);
+    memcpy(&camera->forwardRotation,&eul,sizeof(eul)); 
+    normalize(camera->forwardRotation);
+    camera->rigthRotation = cross(camera->forwardRotation, (vector){0.f, 1.0f, 0.f});
+    normalize(camera->rigthRotation);
+
+    camera->upVectorRotaion = cross(camera->rigthRotation, camera->forwardRotation);
+    normalize(camera->upVectorRotaion);
+
     vector N = camera->forwardRotation;
     normalize(N);
     vector U = camera->upVectorRotaion;
@@ -95,11 +105,7 @@ void moveCamera(Camera *camera){
     setForwards(camera->target,&camera->cameraMatrix);
     setUp(camera->upVector,&camera->cameraMatrix);
     setRight(camera->rigth,&camera->cameraMatrix);
-    // memset(camera->cameraMatrix,0,sizeof(camera->cameraMatrix));
-    // camera->cameraMatrix[0][0] = 1.f;
-    // camera->cameraMatrix[1][1] = 1.f;
-    // camera->cameraMatrix[2][2] = 1.f;
-     camera->cameraMatrix[3][3] =1.f; 
+    camera->cameraMatrix[3][3] =1.f; 
     setCameraPosition(camera);
   multiplyMat4f2(camera->finalCamera,camera->cameraRotation,camera->cameraMatrix);
 }
@@ -119,32 +125,32 @@ case GLFW_KEY_DOWN:{
   
     break;
   }
-  case GLFW_KEY_LEFT:
+  case GLFW_KEY_D:
   {
-    vector left = cross(camera->upVector,camera->target);
+    vector left = cross(camera->upVector,camera->forwardRotation);
     normalize(left);
     addToVector(&camera->cameraPosition,scaleAndReturn(&left,cameraScaler));
     break;
   }
 
-case GLFW_KEY_RIGHT:
+case GLFW_KEY_A:
   {
-    vector left = cross(camera->target,camera->upVector);
+    vector left = cross(camera->forwardRotation,camera->upVector);
     normalize(left);
     addToVector(&camera->cameraPosition,scaleAndReturn(&left,cameraScaler));
     break;
   }
 
-  case GLFW_KEY_KP_ADD:{
-     vector forward = cross(camera->upVector,camera->rigth);
+  case GLFW_KEY_S:{
+     vector forward = cross(camera->upVectorRotaion,camera->rigthRotation);
      normalize(forward);
 
     addToVector(&camera->cameraPosition,scaleAndReturn(&forward,cameraScaler));
     break;
   }
 
-case GLFW_KEY_KP_SUBTRACT:{
-     vector backwards = cross(camera->rigth,camera->upVector);
+case GLFW_KEY_W:{
+     vector backwards = cross(camera->rigthRotation,camera->upVector);
      normalize(backwards);
 
     addToVector(&camera->cameraPosition,scaleAndReturn(&backwards,cameraScaler));

@@ -184,18 +184,7 @@ void mouseInput(GLFWwindow *window, Camera *camera) {
       camera->euler.y -= 360.f;
     if (camera->euler.y < -360.f)
       camera->euler.y += -360;
-    //  camera->euler.p = toRad(camera->euler.p);
-    //  camera->euler.y = toRad(camera->euler.y);
     
-    vector eul = eulerToVector(camera->euler);
-    memcpy(&camera->forwardRotation,&eul,sizeof(eul)); 
-    normalize(camera->forwardRotation);
-    camera->rigthRotation = cross(camera->forwardRotation, (vector){0.f, 1.0f, 0.f});
-    normalize(camera->rigthRotation);
-
-    camera->upVectorRotaion = cross(camera->rigthRotation, camera->forwardRotation);
-    normalize(camera->upVectorRotaion);
-    // buildViewMatrix(camera);
      cameraTransform(camera);
      moveCamera(camera);
     camera->lastMouseX = xpos;
