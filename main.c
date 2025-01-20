@@ -4,19 +4,21 @@
 #include "GLFW/glfw3.h"
 #include "camera.h"
 #include "cube.h"
+#include "euler.h"
 #include "image.h"
 #include "math.h"
 #include "math/mat4.h"
 #include "math/vector.h"
 #include "stdio.h"
 #include "vertex.h"
-
 int key_pressed[GLFW_KEY_LAST] = {0};
 float zMove = 0.0;
 float zMinus = 0.0;
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window, int key, int scancode, int action,
                   int mods);
+
+void mouseInput(GLFWwindow *window, Camera *camera);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -102,12 +104,15 @@ int main() {
   camera->cameraPosition = (vector){0.f, 0.f, 0.f};
   setCameraPosition(camera);
 
+  double xpos;
+  double ypos;
+
   glEnable(GL_DEPTH_TEST);
   // glCullFace(GL_BACK);
   glfwSetKeyCallback(window, processInput);
-
   float camX = .01f;
   while (!glfwWindowShouldClose(window)) {
+    mouseInput(window, camera);
 
     float dt = 1.0 / 60.f;
 
@@ -115,10 +120,9 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float scaleSpeed = 0.5f; // Adjust speed of scaling
     angle += angleMult;
-    if (angle >  360|| angle < -360) {
-angle = 0;
+    if (angle > 360 || angle < -360) {
+      angle = 0;
     }
-
 
     setRotationY(toRad(angle), cube->rotateX);
 
@@ -130,7 +134,7 @@ angle = 0;
     setUniformMatrix4f("projection", vertex.id, projection);
     setUniformMatrix4f("camera", vertex.id, camera->finalCamera);
 
-   glBindTexture(GL_TEXTURE_2D, image.id);
+    glBindTexture(GL_TEXTURE_2D, image.id);
     glUseProgram(vertex.id);
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -154,13 +158,50 @@ angle = 0;
 void processInput(GLFWwindow *window, int key, int scancode, int action,
                   int mods) {
 
-  if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-  glfwSetWindowShouldClose(window,1);
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, 1);
   }
   Camera *camera = (Camera *)glfwGetWindowUserPointer(window);
-  handleCameraMovement(window,key, camera);
+  handleCameraMovement(window, key, camera);
 }
 
+void mouseInput(GLFWwindow *window, Camera *camera) {
+  double xpos, ypos;
+
+  glfwGetCursorPos(window, &xpos, &ypos);
+  if (camera->lastMouseX != xpos) {
+    camera->mouseX = xpos - camera->lastMouseX;
+    camera->mouseY = ypos - camera->lastMouseY; 
+
+    camera->euler.p -= camera->mouseY * 0.01f;
+    camera->euler.y += camera->mouseX * 0.01f;
+
+    if (camera->euler.p > 89)
+      camera->euler.p = 89;
+    if (camera->euler.p < -89)
+      camera->euler.p = -89;
+    if (camera->euler.y > 360.f)
+      camera->euler.y -= 360.f;
+    if (camera->euler.y < -360.f)
+      camera->euler.y += -360;
+    //  camera->euler.p = toRad(camera->euler.p);
+    //  camera->euler.y = toRad(camera->euler.y);
+    
+    vector eul = eulerToVector(camera->euler);
+    memcpy(&camera->forwardRotation,&eul,sizeof(eul)); 
+    normalize(camera->forwardRotation);
+    camera->rigthRotation = cross(camera->forwardRotation, (vector){0.f, 1.0f, 0.f});
+    normalize(camera->rigthRotation);
+
+    camera->upVectorRotaion = cross(camera->rigthRotation, camera->forwardRotation);
+    normalize(camera->upVectorRotaion);
+    // buildViewMatrix(camera);
+     cameraTransform(camera);
+     moveCamera(camera);
+    camera->lastMouseX = xpos;
+    camera->lastMouseY = ypos;
+  }
+}
 // glfw: whenever the window size changed (by OS or user resize) this callback
 // function executes
 // ---------------------------------------------------------------------------------------------
