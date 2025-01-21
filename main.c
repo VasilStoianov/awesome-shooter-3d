@@ -108,6 +108,8 @@ int main() {
   double ypos;
 
   glEnable(GL_DEPTH_TEST);
+ glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+
   // glCullFace(GL_BACK);
   glfwSetKeyCallback(window, processInput);
   float camX = .01f;
@@ -173,8 +175,8 @@ void mouseInput(GLFWwindow *window, Camera *camera) {
     camera->mouseX = xpos - camera->lastMouseX;
     camera->mouseY = ypos - camera->lastMouseY; 
 
-    camera->euler.p -= camera->mouseY * 0.01f;
-    camera->euler.y += camera->mouseX * 0.01f;
+    camera->euler.p -= camera->mouseY *0.001f;
+    camera->euler.y += camera->mouseX *0.001f;
 
     if (camera->euler.p > 89)
       camera->euler.p = 89;
@@ -189,6 +191,7 @@ void mouseInput(GLFWwindow *window, Camera *camera) {
      moveCamera(camera);
     camera->lastMouseX = xpos;
     camera->lastMouseY = ypos;
+
   }
 }
 // glfw: whenever the window size changed (by OS or user resize) this callback
