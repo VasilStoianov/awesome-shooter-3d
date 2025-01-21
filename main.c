@@ -1,10 +1,9 @@
 
 #include "glad.h"
-
 #include "GLFW/glfw3.h"
-#include "camera.h"
+#include "math/camera.h"
 #include "cube.h"
-#include "euler.h"
+#include "math/euler.h"
 #include "image.h"
 #include "math.h"
 #include "math/mat4.h"
@@ -103,16 +102,12 @@ int main() {
   createCameraMatrix(camera);
   camera->cameraPosition = (vector){0.f, 0.f, 0.f};
   setCameraPosition(camera);
-
-  double xpos;
-  double ypos;
-
+ 
   glEnable(GL_DEPTH_TEST);
  glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
 
   // glCullFace(GL_BACK);
   glfwSetKeyCallback(window, processInput);
-  float camX = .01f;
   while (!glfwWindowShouldClose(window)) {
     mouseInput(window, camera);
 

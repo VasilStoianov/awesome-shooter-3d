@@ -1,4 +1,5 @@
 #pragma once
+#include "GLFW/glfw3.h"
 #include "euler.h"
 #include "math/mat4.h"
 #include "math/vector.h"
@@ -14,9 +15,6 @@ typedef struct Camera {
   float cameraSpeed;
   vector cameraPosition;
   vector upVector;
-  vector rigth;
-  vector target;
-  vector forward;
   float mouseX;
   float mouseY;
   float lastMouseX;
@@ -32,13 +30,10 @@ void setCameraPosition(Camera *camera) {
   camera->cameraMatrix[2][3] = -camera->cameraPosition.z;
 }
 void createCameraMatrix(Camera *camera) {
-  camera->target = (vector){0.f, 0.f, -1.f};
   camera->upVector = (vector){0.f, 1.f, 0.f};
-  camera->rigth = (vector){1.f, 0.f, 0.f};
-  camera->forward = (vector){0.f};
-  camera->upVectorRotaion = (vector){0.f};
-  camera->forwardRotation = (vector){0.f};
-  camera->rigthRotation = (vector){0.f};
+  camera->upVectorRotaion = (vector){0.f,1.f,.0f};
+  camera->forwardRotation = (vector){0.f,0.f,1.f};
+  camera->rigthRotation = (vector){1.f,0.f,0.f};
   camera->cameraSpeed = 0.1f;
   camera->cameraPosition = (vector){0.f, 0.f, 0.f};
   camera->euler.p = 0.f;
@@ -48,17 +43,17 @@ void createCameraMatrix(Camera *camera) {
   camera->mouseY = 0.f;
   camera->lastMouseX = 0.f;
   camera->lastMouseY = 0.f;
-  mat4fFromVectors(&camera->cameraMatrix, camera->upVector, camera->rigth,
-                   camera->target, (vector){0.f, 0.f, 0.f});
-  setForwards(camera->target, &camera->cameraMatrix);
+  mat4fFromVectors(&camera->cameraMatrix, camera->upVector, camera->rigthRotation,
+                   camera->forwardRotation, (vector){0.f, 0.f, 0.f});
+  setForwards(camera->forwardRotation, &camera->cameraMatrix);
   setUp(camera->upVector, &camera->cameraMatrix);
-  setRight(camera->rigth, &camera->cameraMatrix);
+  setRight(camera->rigthRotation, &camera->cameraMatrix);
   setCameraPosition(camera);
   camera->cameraMatrix[3][3] = 1.f;
-  mat4fFromVectors(&camera->cameraRotation, camera->upVector, camera->rigth,
-                   camera->target, (vector){0.f, 0.f, 0.f});
-  mat4fFromVectors(&camera->finalCamera, camera->upVector, camera->rigth,
-                   camera->target, (vector){0.f, 0.f, 0.f});
+  mat4fFromVectors(&camera->cameraRotation, camera->upVector, camera->rigthRotation,
+                   camera->forwardRotation, (vector){0.f, 0.f, 0.f});
+  mat4fFromVectors(&camera->finalCamera, camera->upVector, camera->rigthRotation,
+                   camera->forwardRotation, (vector){0.f, 0.f, 0.f});
 }
 
 void cameraTransform(Camera *camera) {
@@ -102,9 +97,10 @@ void cameraTransform(Camera *camera) {
 }
 
 void moveCamera(Camera *camera) {
-  setForwards(camera->target, &camera->cameraMatrix);
-  setUp(camera->upVector, &camera->cameraMatrix);
-  setRight(camera->rigth, &camera->cameraMatrix);
+  // setForwards(camera->forwardRotation, &camera->cameraMatrix);
+  // setUp(camera->upVector, &camera->cameraMatrix);
+  // setRight(camera->forwardRotation, &camera->cameraMatrix);
+  identity(&camera->cameraMatrix);
   camera->cameraMatrix[3][3] = 1.f;
   setCameraPosition(camera);
   multiplyMat4f2(camera->finalCamera, camera->cameraRotation,

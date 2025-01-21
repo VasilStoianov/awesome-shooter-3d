@@ -1,5 +1,5 @@
 #pragma once
-#include "math/vector.h"
+#include "vector.h"
 
 typedef struct Euler{
   float p;
